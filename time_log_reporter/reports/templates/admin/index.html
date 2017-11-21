@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        {% if request.user.is_superuser %}
+            {% if app_list %}
+                {% for app in app_list %}
+                    <div class="app-{{ app.app_label }} module">
+                        <table>
+                            <caption>
+                                <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">{{ app.name }}</a>
+                            </caption>
+                            {% for model in app.models %}
+                                <tr class="model-{{ model.object_name|lower }}">
+                                    {% if model.admin_url %}
+                                        <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+                                    {% else %}
+                                        <th scope="row">{{ model.name }}</th>
+                                    {% endif %}
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>{% trans "You don't have permission to edit anything." %}</p>
+            {% endif %}
+        {% else %}
+            <h2>
+                {% if request.team == None %}
+                    {% trans "No group assigned" %}
+                {% else %}
+                    {{ request.team.name }}
+                {% endif %}
+            </h2>
+            <div class="module">
+                <table>
+                    <caption>
+                        Reports
+                    </caption>
+                    <tr>
+                        <th scope="row"><a href="/admin/reports/member/">Members</a></th>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><a href="/admin/reports/project/">Projects</a></th>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
