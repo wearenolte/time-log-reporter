@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
+    admin = models.ForeignKey(User)
     def __str__(self):
         return self.name
 
@@ -13,7 +14,6 @@ class Member(models.Model):
     name = models.CharField(max_length=200)
     avatar = models.CharField(blank=True, max_length=200)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, blank=True, null=True)
     def __str__(self):
         return self.name
 
@@ -21,6 +21,7 @@ class Member(models.Model):
 class Project(models.Model):
     name = models.CharField(max_length=200)
     estimated_hours = models.IntegerField()
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     members = models.ManyToManyField(Member, through='Membership')
     def __str__(self):
         return self.name
