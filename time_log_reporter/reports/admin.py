@@ -12,12 +12,18 @@ class MembersInline(admin.TabularInline):
     model = Member
     extra = 0
     fields = ['name']
+    readonly_fields = ['name']
+    can_delete = False
+    max_num = 0
 
 
 class ProjectsInline(admin.TabularInline):
     model = Project
     extra = 0
     fields = ['name', 'estimated_hours']
+    readonly_fields = ['name', 'estimated_hours']
+    can_delete = False
+    max_num = 0
 
 
 class MembershipInline(admin.TabularInline):
