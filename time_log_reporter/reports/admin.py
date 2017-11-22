@@ -48,7 +48,7 @@ class TeamAdmin(admin.ModelAdmin):
         queryset, use_distinct = super(TeamAdmin, self).get_search_results(request, queryset, search_term)
         # If not a superuser then dont show members from other teams
         if not request.user.is_superuser:
-            queryset = self.model.objects.filter(id__in=request.teams)
+            queryset = self.model.objects.filter(id__in=request.teams).order_by('id')
         return queryset, use_distinct
         
     def has_add_permission(self, request):
@@ -105,7 +105,7 @@ class MemberAdmin(admin.ModelAdmin):
         queryset, use_distinct = super(MemberAdmin, self).get_search_results(request, queryset, search_term)
         # If not a superuser then dont show members from other teams
         if not request.user.is_superuser:
-            queryset = self.model.objects.filter(team__in=request.teams)
+            queryset = self.model.objects.filter(team__in=request.teams).order_by('id')
         return queryset, use_distinct
         
     def get_form(self, request, obj=None, **kwargs):
