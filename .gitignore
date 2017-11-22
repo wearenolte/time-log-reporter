@@ -1,5 +1,7 @@
 time_log_reporter/db.sqlite3
 time_log_reporter/reports/__pycache__/
+time_log_reporter/reports/management/__pycache__/
+time_log_reporter/reports/management/commands/__pycache__/
 time_log_reporter/reports/middleware/__pycache__/
 time_log_reporter/reports/migrations/__pycache__/
 time_log_reporter/reports/migrations/0001_initial.py

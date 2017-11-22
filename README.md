@@ -45,3 +45,10 @@ python manage.py runserver
 ```
 
 Open in your browser http://localhost:8000/admin
+
+
+## Running custom commands
+
+```
+python manage.py sendreports
+```
