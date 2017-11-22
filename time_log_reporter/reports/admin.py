@@ -13,19 +13,6 @@ class TeamForm(forms.ModelForm):
         labels = {
             'admin': 'Administrator',
         }
-    def clean_admin(self):
-        # When adding or editing a team, the assigned admin cannot be assigned to another team
-        admin = self.cleaned_data['admin']
-        ok = True
-        try:
-            current_team = Team.objects.get(admin = admin.id)
-            if current_team.id != self.instance.id:
-                ok = False
-        except Team.DoesNotExist:
-            ok = True
-        if not ok:
-            raise ValidationError("The new administrator is already administrating another group")
-        return admin
 
 
 class MembersInline(admin.TabularInline):
@@ -49,6 +36,44 @@ class TeamAdmin(admin.ModelAdmin):
     def members_amount(self, object):
         return object.members.count()
     members_amount.short_description = 'Members'
+    
+    def get_form(self, request, obj=None, **kwargs):
+        # Dont ask for the admin if it is an admin
+        if not request.user.is_superuser:
+            self.exclude = ['admin']
+            self.readonly_fields = ['name']
+        return super(TeamAdmin, self).get_form(request, obj, **kwargs)
+    
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super(TeamAdmin, self).get_search_results(request, queryset, search_term)
+        # If not a superuser then dont show members from other teams
+        if not request.user.is_superuser:
+            queryset = self.model.objects.filter(id__in=request.teams)
+        return queryset, use_distinct
+        
+    def has_add_permission(self, request):
+        # Only superusers may add teams
+        if request.user.is_superuser:
+            return True
+        return False
+        
+    def has_change_permission(self, request, obj = None):
+        # Do not allow admins to change teams of others
+        has_class_permission = super(TeamAdmin, self).has_change_permission(request, obj)
+        if not has_class_permission:
+            return False
+        if obj is not None and not request.user.is_superuser and request.teams.filter(id = obj.id).count() == 0:
+            return False
+        return True
+        
+    def has_delete_permission(self, request, obj = None):
+        # Do not allow admins to delete teams of others
+        has_class_permission = super(TeamAdmin, self).has_delete_permission(request, obj)
+        if not has_class_permission:
+            return False
+        if obj is not None and not request.user.is_superuser and request.teams.filter(id = obj.id).count() == 0:
+            return False
+        return True
 
 
 class MemberForm(forms.ModelForm):
@@ -58,6 +83,13 @@ class MemberForm(forms.ModelForm):
         if Member.objects.filter(name = name).exclude(id = self.instance.id).count() > 0:
             raise ValidationError("Member already exists")
         return name
+
+    def clean_team(self):
+        # When adding or editing a team, the admin can not be assigned to another team
+        team = self.cleaned_data['team']
+        if not self.request.user.is_superuser and self.request.teams.filter(id = team.id).count() == 0:
+            raise ValidationError("Choose a valid team")
+        return team
 
 
 class MemberAdmin(admin.ModelAdmin):
@@ -73,27 +105,36 @@ class MemberAdmin(admin.ModelAdmin):
         queryset, use_distinct = super(MemberAdmin, self).get_search_results(request, queryset, search_term)
         # If not a superuser then dont show members from other teams
         if not request.user.is_superuser:
-            queryset = self.model.objects.filter(team=request.team.id)
+            queryset = self.model.objects.filter(team__in=request.teams)
         return queryset, use_distinct
         
     def get_form(self, request, obj=None, **kwargs):
-        # Dont ask for the team if it is an admin
-        if not request.user.is_superuser:
-            self.exclude.append('team')
-        return super(MemberAdmin, self).get_form(request, obj, **kwargs)
+        # Lets save the request object in the form
+        form = super(MemberAdmin, self).get_form(request, obj=obj, **kwargs)
+        form.request = request
+        return form
         
-    def save_model(self, request, obj, form, change):
-        # If an admin, lets set its team
-        if not request.user.is_superuser:
-            obj.team = request.team
-        super(MemberAdmin, self).save_model(request, obj, form, change)
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # Only a team from the same admin can be assigned
+        if not request.user.is_superuser and db_field.name == "team":
+            kwargs["queryset"] = request.teams
+        return super(MemberAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
         
     def has_change_permission(self, request, obj = None):
         # Do not allow admins to change members of other teams
         has_class_permission = super(MemberAdmin, self).has_change_permission(request, obj)
         if not has_class_permission:
             return False
-        if obj is not None and not request.user.is_superuser and request.team != obj.team:
+        if obj is not None and not request.user.is_superuser and request.teams.filter(id = obj.team.id).count() == 0:
+            return False
+        return True
+        
+    def has_delete_permission(self, request, obj = None):
+        # Do not allow admins to delete teams of others
+        has_class_permission = super(MemberAdmin, self).has_delete_permission(request, obj)
+        if not has_class_permission:
+            return False
+        if obj is not None and not request.user.is_superuser and request.teams.filter(id = obj.team.id).count() == 0:
             return False
         return True
 

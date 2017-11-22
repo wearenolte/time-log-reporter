@@ -13,10 +13,10 @@ class LoadExtraData(object):
         
         if not request.user.is_superuser:
             try:
-                team = Team.objects.get(admin = request.user.id)
+                teams = Team.objects.filter(admin = request.user.id)
             except Team.DoesNotExist:
-                team = None
-            request.team = team
+                teams = None
+            request.teams = teams
 
         response = self.get_response(request)
 
