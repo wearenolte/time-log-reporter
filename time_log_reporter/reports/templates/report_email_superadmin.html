@@ -1,0 +1,44 @@
+{% if users_without_team %}
+    <div>
+        <h3>Users without a team</h3>
+        {% for user_name in users_without_team %}
+            <div>{{ user_name }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+
+<div>
+    <h3>Summary per project</h3>
+    
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Week</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team, team_hours in time_per_team.items %}
+                <tr>
+                    <td>{{ team }}</td>
+                    <td>{{ team_hours|round_if_not_empty }}</td>
+                    <td>{{ time_per_team_per_day|get_item:team|get_item:0|round_if_not_empty }}</td>
+                    <td>{{ time_per_team_per_day|get_item:team|get_item:1|round_if_not_empty }}</td>
+                    <td>{{ time_per_team_per_day|get_item:team|get_item:2|round_if_not_empty }}</td>
+                    <td>{{ time_per_team_per_day|get_item:team|get_item:3|round_if_not_empty }}</td>
+                    <td>{{ time_per_team_per_day|get_item:team|get_item:4|round_if_not_empty }}</td>
+                    <td>{{ time_per_team_per_day|get_item:team|get_item:5|round_if_not_empty }}</td>
+                    <td>{{ time_per_team_per_day|get_item:team|get_item:6|round_if_not_empty }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
