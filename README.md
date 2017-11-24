@@ -13,19 +13,25 @@ Groups of members that have an administrator (that must be a registered user).
 ### Members
 Defined by a name, they belong to a team.
 
-### Superusers
+### Superadministrators
 Managers of teams. They can control entire application.
 
 ### Administrators
-Managers of specific groups.
+Managers of specific teams.
 
 
 ## Install
 
-1. Create the settings.py file in time_log_reporter/time_log_reporter from the settings.py.txt file. Edit the database connection credentials and the timezone.
+1. Create the settings.py file in time_log_reporter/time_log_reporter from the settings.py.txt file.
 ```bash
 cp time_log_reporter/time_log_reporter/settings.py.txt time_log_reporter/time_log_reporter/settings.py
 ```
+Fill in the following configuration values:
+* Database connection credentials.
+* Timezone.
+* HarvestApp API account and key.
+* Email SMTP settings.
+
 2. Create the db schema
 ```bash
 cd time_log_reporter
@@ -33,6 +39,7 @@ python manage.py makemigrations reports
 python manage.py sqlmigrate reports 0001
 python manage.py migrate
 ```
+
 3. Create a superuser for the app
 ```bash
 python manage.py createsuperuser

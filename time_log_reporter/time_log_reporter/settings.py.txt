@@ -125,5 +125,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
+# Harvest App
+
 HARVEST_ACCOUNT_ID = ''
 HARVEST_ACCOUNT_TOKEN = ''
+
+
+# Email
+EMAIL_HOST = ''
+EMAIL_PORT = 
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_SSL = True
