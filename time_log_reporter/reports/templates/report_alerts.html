@@ -1,0 +1,41 @@
+{% load reports_filters %}
+
+
+{% if users_without_team %}
+    <div>
+        <h3>Users without a team</h3>
+        <table cellspacing="0" style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">User</td>
+                </tr>
+                {% for user_name in users_without_team.items|sort_items %}
+                    <tr>
+                        <td style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">{{ user_name }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+
+
+{% if user_with_less_than_7_hours %}
+    <div>
+        <h3>Users registering less than 7 hours</h3>
+        <table cellspacing="0" style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">User</td>
+                    <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold; text-align:right">Hours</td>
+                </tr>
+                {% for user_name, registered_hours in user_with_less_than_7_hours.items|sort_items %}
+                    <tr>
+                        <td style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">{{ user_name }}</td>
+                        <td style="padding:5px 10px; background-color:#F7F7F7; text-align:right">{{ registered_hours|round_if_not_empty }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
