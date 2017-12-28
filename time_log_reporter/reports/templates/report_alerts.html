@@ -9,7 +9,7 @@
                 <tr>
                     <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">User</td>
                 </tr>
-                {% for user_name in users_without_team.items|sort_items %}
+                {% for user_name,true_value in users_without_team.items|sort_items %}
                     <tr>
                         <td style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">{{ user_name }}</td>
                     </tr>
