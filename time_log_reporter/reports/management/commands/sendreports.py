@@ -74,10 +74,18 @@ class Command(BaseCommand):
     
     
     def handle(self, *args, **options):
+    
+        import datetime
+        
+        # Only run on saturday
+        weekday = datetime.datetime.today().weekday()
+        if weekday != 5:
+            import sys
+            sys.exit()
+        
         # Import the needed tools
         import urllib.request
         import json
-        import datetime
         import os.path
         
         # Lets get members and its data
