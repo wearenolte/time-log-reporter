@@ -101,6 +101,14 @@ class Command(BaseCommand):
             if not team_name in user_with_less_than_7_hours_per_team:
                 user_with_less_than_7_hours_per_team[team_name] = {}
             user_with_less_than_7_hours_per_team[team_name][member_name] = hours
+        
+        # Lets register whoever did not log any hour
+        for member in members:
+            if not member.name in hours_per_member:
+                user_with_less_than_7_hours[member.name] = 0.0
+                if not member.team.name in user_with_less_than_7_hours_per_team:
+                    user_with_less_than_7_hours_per_team[member.team.name] = {}
+                user_with_less_than_7_hours_per_team[member.team.name][member.name] = 0.0
 
         # If there is some alert to send then lets send it to superadmins first
         if users_without_team or user_with_less_than_7_hours:
