@@ -121,7 +121,7 @@ class Command(BaseCommand):
 
             if len(superadmin_email_addresses) > 0:
                 email_message = EmailMessage(
-                    'WeAreNolte: Alerts as of ' + yesterday_title,
+                    'Time logging exceptions: ' + yesterday_title,
                     render_to_string('report_alerts.html', {'users_without_team': users_without_team, 'user_with_less_than_7_hours': user_with_less_than_7_hours}),
                     settings.EMAIL_FROM_ADDRESS,
                     bcc = superadmin_email_addresses,
@@ -148,7 +148,7 @@ class Command(BaseCommand):
                     
             if user_with_less_than_7_hours_for_admin:
                 email_message = EmailMessage(
-                    'WeAreNolte: Alerts as of ' + yesterday_title,
+                    'Time logging exceptions: ' + yesterday_title,
                     render_to_string('report_alerts.html', {'users_without_team': {}, 'user_with_less_than_7_hours': user_with_less_than_7_hours_for_admin}),
                     settings.EMAIL_FROM_ADDRESS,
                     [admin_email],
