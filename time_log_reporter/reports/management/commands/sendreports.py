@@ -139,7 +139,7 @@ class Command(BaseCommand):
             email_message = EmailMessage(
                 'WeAreNolte: ' + title_date_range,
                 self.__get_summary_for_teams(members_per_id, all_time_entries, []),
-                'reports@wearenolte.com',
+                settings.EMAIL_FROM_ADDRESS,
                 bcc = superadmin_email_addresses,
             )
             email_message.content_subtype = 'html'
@@ -158,7 +158,7 @@ class Command(BaseCommand):
             email_message = EmailMessage(
                 'WeAreNolte: ' + title_date_range,
                 self.__get_summary_for_teams(members_per_id, all_time_entries, teams),
-                'reports@wearenolte.com',
+                settings.EMAIL_FROM_ADDRESS,
                 [admin_email],
             )
             email_message.content_subtype = 'html'

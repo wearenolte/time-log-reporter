@@ -123,7 +123,7 @@ class Command(BaseCommand):
                 email_message = EmailMessage(
                     'WeAreNolte: Alerts as of ' + yesterday_title,
                     render_to_string('report_alerts.html', {'users_without_team': users_without_team, 'user_with_less_than_7_hours': user_with_less_than_7_hours}),
-                    'reports@wearenolte.com',
+                    settings.EMAIL_FROM_ADDRESS,
                     bcc = superadmin_email_addresses,
                 )
                 email_message.content_subtype = 'html'
@@ -150,7 +150,7 @@ class Command(BaseCommand):
                 email_message = EmailMessage(
                     'WeAreNolte: Alerts as of ' + yesterday_title,
                     render_to_string('report_alerts.html', {'users_without_team': {}, 'user_with_less_than_7_hours': user_with_less_than_7_hours_for_admin}),
-                    'reports@wearenolte.com',
+                    settings.EMAIL_FROM_ADDRESS,
                     [admin_email],
                 )
                 email_message.content_subtype = 'html'
