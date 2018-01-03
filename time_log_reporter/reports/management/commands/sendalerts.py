@@ -8,8 +8,6 @@ from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 from django.core.management.base import BaseCommand, CommandError
 from django.template.loader import render_to_string
-from ...models import Member
-from ...models import Team
 
 
 class Command(BaseCommand):
