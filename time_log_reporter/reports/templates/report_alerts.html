@@ -24,3 +24,28 @@
         </table>
     </div>
 {% endif %}
+
+
+{% if contractors_with_less_than_minimum_hours %}
+    <div>
+        <h3>Contractors that registered less than {{ minimum_hours|round_if_not_empty }} hours</h3>
+        <table cellspacing="0" style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">Contractor</td>
+                    <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold; text-align:right">Hours</td>
+                </tr>
+                {% for e in contractors_with_less_than_minimum_hours %}
+                    <tr>
+                        <td style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">
+                            <a href="https://wearenolte.harvestapp.com/team/{{ e.user.id }}">
+                                {{ e.user.last_name }}, {{ e.user.first_name }}
+                            </a>
+                        </td>
+                        <td style="padding:5px 10px; background-color:#F7F7F7; text-align:right">{{ e.hours|round_if_not_empty }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
