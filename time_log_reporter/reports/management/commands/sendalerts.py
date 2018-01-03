@@ -18,39 +18,46 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
     
-        import datetime
-        
-        # Only run from tuesday to saturday
-        weekday = datetime.datetime.today().weekday()
-        if weekday == 0 or weekday == 6:
-            import sys
-            sys.exit()
-        
         # Import the needed tools
         import urllib.request
         import json
-        import os.path
+        import os.path        
+        import datetime
+        import sys
+
+        # Only run from tuesday to saturday
+        weekday = datetime.datetime.today().weekday()
+        if weekday == 0 or weekday == 6:
+            sys.exit()
         
         # Lets get members and its data
-        members = Member.objects.all()
-        members_per_id = {}
-        for member in members:
-            members_per_id[member.name] = member
+        users = {}
+        next_page = 1
+
+        # Requesting each page
+        while next_page != None:
+            req = urllib.request.Request('https://api.harvestapp.com/api/v2/users?is_active=true' + '&page=' + str(next_page))
+            req.add_header('Harvest-Account-ID', settings.HARVEST_ACCOUNT_ID)
+            req.add_header('Authorization', 'Bearer ' + settings.HARVEST_ACCOUNT_TOKEN)
+            response = urllib.request.urlopen(req)
+            data = json.load(response)
+            # Extract data
+            for user in data.get('users', []):
+                users[user.get('id')] = {'id': user.get('id'), 'first_name': user.get('first_name'), 'last_name': user.get('last_name'), 'email': user.get('email'), 'is_contractor': user.get('is_contractor')}
+            # Go on
+            next_page = data.get('next_page', None)
             
-        # Lets define where intermediate data will be stored
-        users_without_team = {}
-        user_with_less_than_7_hours = {}
-        user_with_less_than_7_hours_per_team = {}
-        
         # Lets calculate the start and end date
         yesterday = datetime.date.today() - datetime.timedelta(days=1)
         yesterday_title = yesterday.strftime("%b %d, %Y")
         yesterday = yesterday.strftime("%Y-%m-%d")
         
         # Lets get the time entries we want
+        minimum_hours = 7.0
+        users_with_less_than_minimum_hours = []
+        hours_per_user = {}
         all_time_entries = []
         next_page = 1
-        total_pages = None
         
         # Requesting each page
         while next_page != None:
@@ -65,93 +72,52 @@ class Command(BaseCommand):
                 all_time_entries = all_time_entries + time_entries
             
             next_page = data.get('next_page', None)
-            total_pages = data.get('total_pages', None)
         
-        # Lets start calculating which emails have to be sent
-        email_messages = []
-        hours_per_member = {}
-
-        # Lets group time entries by member
-        for entry in time_entries:
-            member_name = entry.get('user').get('name')
+        # Lets group time entries by user
+        for entry in all_time_entries:
+            user_id = entry.get('user').get('id')
             hours = float(entry.get('hours'))
-            
-            if not member_name in hours_per_member:
-                hours_per_member[member_name] = 0
-            
-            hours_per_member[member_name] += hours
+            if not user_id in hours_per_user:
+                hours_per_user[user_id] = 0
+            hours_per_user[user_id] += hours
         
-        # Lets register whoever logged less than 7 hours
-        for member_name, hours in hours_per_member.items():
-            # Lets check if it logged less than 7 hours
-            if hours >= 7.0:
-                continue
-                
-            user_with_less_than_7_hours[member_name] = hours
+        # Lets register whoever logged less than minimum_hours
+        for user_id, hours in hours_per_user.items():
+            if hours < minimum_hours:
+                users_with_less_than_minimum_hours.append({'user': users[user_id], 'hours': hours})
 
-            # Lets check if it has a team
-            member = members_per_id.get(member_name)
-            if member == None:
-                users_without_team[member_name] = True
-                continue
-            
-            team_name = member.team.name
-        
-            # Lets register members per team with less than 7 hours
-            if not team_name in user_with_less_than_7_hours_per_team:
-                user_with_less_than_7_hours_per_team[team_name] = {}
-            user_with_less_than_7_hours_per_team[team_name][member_name] = hours
-        
         # Lets register whoever did not log any hour
-        for member in members:
-            if not member.name in hours_per_member:
-                user_with_less_than_7_hours[member.name] = 0.0
-                if not member.team.name in user_with_less_than_7_hours_per_team:
-                    user_with_less_than_7_hours_per_team[member.team.name] = {}
-                user_with_less_than_7_hours_per_team[member.team.name][member.name] = 0.0
+        for user_id, user in users.items():
+            if not user_id in hours_per_user:
+                users_with_less_than_minimum_hours.append({'user': users[user_id], 'hours': 0.0})
+                
+        # Prepare results for showing in emails
+        email_messages = []
+        users_with_less_than_minimum_hours = sorted(users_with_less_than_minimum_hours, key = lambda x: x['user']['last_name'])
+        regular_users_with_less_than_minimum_hours = []
+        contractors_with_less_than_minimum_hours = []
+        for e in users_with_less_than_minimum_hours:
+            if e['user']['is_contractor']:
+                contractors_with_less_than_minimum_hours.append(e)
+            else:
+                regular_users_with_less_than_minimum_hours.append(e)
 
-        # If there is some alert to send then lets send it to superadmins first
-        if users_without_team or user_with_less_than_7_hours:
-            users = User.objects.all()        
+        # If there is some alert to send
+        if users_with_less_than_minimum_hours:
+            # Lets send it to superadmins
+            sys_users = User.objects.all()        
             superadmin_email_addresses = []
             
-            for user in users:
-                if user.is_superuser and user.email != None and user.email != '':
-                    superadmin_email_addresses.append(user.email)
+            for sys_user in sys_users:
+                if sys_user.is_superuser and sys_user.email != None and sys_user.email != '':
+                    superadmin_email_addresses.append(sys_user.email)
 
             if len(superadmin_email_addresses) > 0:
                 email_message = EmailMessage(
                     'Time logging exceptions: ' + yesterday_title,
-                    render_to_string('report_alerts.html', {'users_without_team': users_without_team, 'user_with_less_than_7_hours': user_with_less_than_7_hours}),
+                    render_to_string('report_alerts.html', {'minimum_hours': minimum_hours, 'regular_users_with_less_than_minimum_hours': regular_users_with_less_than_minimum_hours, 'contractors_with_less_than_minimum_hours': contractors_with_less_than_minimum_hours}),
                     settings.EMAIL_FROM_ADDRESS,
                     bcc = superadmin_email_addresses,
-                )
-                email_message.content_subtype = 'html'
-                email_messages.append(email_message)
-            
-        # Lets find out the teams of an admin
-        teams = Team.objects.all()
-        admins_and_teams = {}
-        for team in teams:
-            if not team.admin.is_superuser and team.admin.email != None and team.admin.email != '':
-                if admins_and_teams.get(team.admin.email) == None:
-                    admins_and_teams[team.admin.email] = []
-                admins_and_teams[team.admin.email].append(team.name)
-                
-        # Lets find out if there is any member of any team of the admin with less than 7 hours. If so then send an email to that admin
-        for admin_email, teams in admins_and_teams.items():
-            user_with_less_than_7_hours_for_admin = {}
-            for team_name in teams:
-                if team_name in user_with_less_than_7_hours_per_team:
-                    for member_name, hours in user_with_less_than_7_hours_per_team[team_name].items():
-                        user_with_less_than_7_hours_for_admin[member_name] = hours
-                    
-            if user_with_less_than_7_hours_for_admin:
-                email_message = EmailMessage(
-                    'Time logging exceptions: ' + yesterday_title,
-                    render_to_string('report_alerts.html', {'users_without_team': {}, 'user_with_less_than_7_hours': user_with_less_than_7_hours_for_admin}),
-                    settings.EMAIL_FROM_ADDRESS,
-                    [admin_email],
                 )
                 email_message.content_subtype = 'html'
                 email_messages.append(email_message)
