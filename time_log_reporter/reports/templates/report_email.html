@@ -1,132 +1,48 @@
 {% load reports_filters %}
 
-
-{% if users_without_team %}
-    <div>
-        <h3>Users without a team</h3>
-        {% for user_name in users_without_team %}
-            <div>{{ user_name }}</div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-
 <div>
-    <h3>Hours per team and project</h3>
+    <h3 style="margin-top:40px;">Hours per user</h3>
     <table cellspacing="0" style="width: 100%;">
-        <thead>
-            <tr>
-                <th></th>
-                <th style="padding:5px 10px; text-align:right">Week</th>
-                <th style="padding:5px 10px; text-align:right">Mon</th>
-                <th style="padding:5px 10px; text-align:right">Tue</th>
-                <th style="padding:5px 10px; text-align:right">Wed</th>
-                <th style="padding:5px 10px; text-align:right">Thu</th>
-                <th style="padding:5px 10px; text-align:right">Fri</th>
-                <th style="padding:5px 10px; text-align:right">Sat</th>
-                <th style="padding:5px 10px; text-align:right">Sun</th>
-            </tr>
-        </thead>
         <tbody>
-            {% for team, team_hours in time_per_team.items|sort_items %}
+            <tr>
+                <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">User</td>
+                <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold; text-align:right">Hours</td>
+            </tr>
+            {% for user, hours in time_per_user.items|sort_items %}
                 <tr>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">{{ team }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ team_hours|round_if_not_empty }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ time_per_team_per_day|get_item:team|get_item:0|round_if_not_empty }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ time_per_team_per_day|get_item:team|get_item:1|round_if_not_empty }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ time_per_team_per_day|get_item:team|get_item:2|round_if_not_empty }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ time_per_team_per_day|get_item:team|get_item:3|round_if_not_empty }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ time_per_team_per_day|get_item:team|get_item:4|round_if_not_empty }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ time_per_team_per_day|get_item:team|get_item:5|round_if_not_empty }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; text-align:right">{{ time_per_team_per_day|get_item:team|get_item:6|round_if_not_empty }}</td>
+                    <td style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">{{ user }}</td>
+                    <td style="padding:5px 10px; background-color:#F7F7F7; text-align:right">{{ hours|round_if_not_empty }}</td>
                 </tr>
-                {% for team_2, team_project in time_per_team_and_project.items %}
-                    {% if team == team_2 %}
-                        {% for project, project_hours in team_project.items|sort_items %}
-                            <tr>
-                                <td style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">{{ project }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; text-align:right">{{ project_hours|round_if_not_empty }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; color:#828282; text-align:right">{{ time_per_team_and_project_per_day|get_item:team|get_item:project|get_item:1|round_if_not_empty }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; color:#828282; text-align:right">{{ time_per_team_and_project_per_day|get_item:team|get_item:project|get_item:2|round_if_not_empty }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; color:#828282; text-align:right">{{ time_per_team_and_project_per_day|get_item:team|get_item:project|get_item:3|round_if_not_empty }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; color:#828282; text-align:right">{{ time_per_team_and_project_per_day|get_item:team|get_item:project|get_item:4|round_if_not_empty }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; color:#828282; text-align:right">{{ time_per_team_and_project_per_day|get_item:team|get_item:project|get_item:5|round_if_not_empty }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; color:#828282; text-align:right">{{ time_per_team_and_project_per_day|get_item:team|get_item:project|get_item:6|round_if_not_empty }}</td>
-                                <td style="padding:5px 10px; background-color:#F7F7F7; color:#828282; text-align:right">{{ time_per_team_and_project_per_day|get_item:team|get_item:project|get_item:0|round_if_not_empty }}</td>
-                            </tr>
-                        {% endfor %}
-                    {% endif %}
-                {% endfor %}
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-
 <div>
-    <h3 style="margin-top:40px;">Hours per team, project and member</h3>
+    <h3 style="margin-top:40px;">Hours per project and user</h3>
     <table cellspacing="0" style="width: 100%;">
-        <thead>
-            <tr>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
         <tbody>
-            {% for team, project_member_day_element in time_per_team_project_member_day.items|sort_items %}
+            <tr>
+                <td colspan=2 style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">Project/user</td>
+                <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold; text-align:right">Hours</td>
+            </tr>
+            {% for project, user_element in time_per_project_per_user.items|sort_items %}
                 <tr>
-                    <td colspan=2 style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold">{{ team }}</td>
-                    <td style="padding:5px 10px; color:white; background-color:#D00000; font-weight:bold; text-align:right">
-                        {% for team_2, team_hours in time_per_team.items %}
-                            {% if team == team_2 %}
-                                {{ team_hours|round_if_not_empty }}
+                    <td colspan=2 style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">{{ project }}</td>
+                    <td style="padding:5px 10px; background-color:#F7F7F7; font-weight:bold; text-align:right">
+                        {% for project_2, project_hours in time_per_project.items %}
+                            {% if project == project_2 %}
+                                {{ project_hours|round_if_not_empty }}
                             {% endif %}
                         {% endfor %}
                     </td>
                 </tr>
-                {% for project, member_day_element in project_member_day_element.items|sort_items %}
+                {% for user, element in user_element.items|sort_items %}
                     <tr>
-                        <td colspan=2 style="padding:5px 10px 5px 20px; background-color:#F7F7F7; font-weight:bold">{{ project }}</td>
-                        <td style="padding:5px 10px; background-color:#F7F7F7; font-weight:bold; text-align:right">
-                            {% for team_2, team_project in time_per_team_and_project.items %}
-                                {% if team == team_2 %}
-                                    {% for project_2, project_hours in team_project.items %}
-                                        {% if project == project_2 %}
-                                            {{ project_hours|round_if_not_empty }}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                        </td>
+                        <td style="padding:5px 10px 5px 30px; font-weight:bold">{{ user }}</td>
+                        <td style="padding:5px 10px; white-space:pre">{{ element.description }}</td>
+                        <td style="padding:5px 10px; text-align:right">{{ element.hours|round_if_not_empty }}</td>
                     </tr>
-                    {% for member, day_element in member_day_element.items|sort_items %}
-                        <tr>
-                            <td colspan=2 style="padding:5px 10px 5px 30px; font-weight:bold">{{ member }}</td>
-                            {% for team_2, project_member in time_per_team_project_member.items %}
-                                {% if team == team_2 %}
-                                    {% for project_2, member_hours  in project_member.items %}
-                                        {% if project == project_2 %}
-                                            {% for member_2, hours  in member_hours.items %}
-                                                {% if member == member_2 %}
-                                                    <td style="padding:5px 10px; font-weight:bold; text-align:right">
-                                                        {{ hours|round_if_not_empty }}
-                                                    </td>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                        {% for day, element in day_element.items|sort_items %}
-                            <tr>
-                                <td style="padding:5px 10px 5px 40px; vertical-align:top">{{ day|day_of_week }}</td>
-                                <td style="padding:5px 10px; white-space:pre">{{ element.description }}</td>
-                                <td style="padding:5px 10px; text-align:right">{{ element.hours|round_if_not_empty }}</td>
-                            </tr>
-                        {% endfor %}
-                    {% endfor %}
                 {% endfor %}
             {% endfor %}
         </tbody>
