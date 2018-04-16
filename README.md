@@ -1,61 +1,21 @@
 # time-log-reporter
 
-This application is intended to give a high-level view of team members time tracking to provide insight from the team as well as managers. Time tracking is important as it provides great data to better understand the business and plan.
+## Configuration
 
-Take a look at a [possible approach](https://www.getharvest.com/blog/2016/02/using-harvest-api-radical-transparency-clients-almanac/#more-13023).
+### Environment variables
+The following environment variables must be set in order to work:
+| Name                  |Comment                                     |
+| ----------------------|--------------------------------------------|
+| MAIN_COLOR            | Color of the brand                         |
+| HARVEST_ACCOUNT_ID    | For reading logs                           |
+| HARVEST_ACCOUNT_TOKEN | For reading logs                           |
+| POSTMARK_SERVER_KEY   | For email sending                          |
+| FROM_EMAIL            | Email address of origin                    |
+| DESTINATION_EMAILS    | Comma separated, recepients of the reports |
 
+## Installation
+npm install
 
-## Concepts
-
-### Teams
-Groups of members that have an administrator (that must be a registered user).
-
-### Members
-Defined by a name, they belong to a team.
-
-### Superadministrators
-Managers of teams. They can control entire application.
-
-### Administrators
-Managers of specific teams.
-
-
-## Install
-
-1. Create the settings.py file in time_log_reporter/time_log_reporter from the settings.py.txt file.
-```bash
-cp time_log_reporter/time_log_reporter/settings.py.txt time_log_reporter/time_log_reporter/settings.py
-```
-Fill in the following configuration values:
-* Database connection credentials.
-* Timezone.
-* HarvestApp API account and key.
-* Email SMTP settings.
-
-2. Create the db schema
-```bash
-cd time_log_reporter
-python manage.py makemigrations reports
-python manage.py sqlmigrate reports 0001
-python manage.py migrate
-```
-
-3. Create a superuser for the app
-```bash
-python manage.py createsuperuser
-```
-
-## Run
-
-```bash
-python manage.py runserver
-```
-
-Open in your browser http://localhost:8000/admin
-
-
-## Running custom commands
-
-```
-python manage.py sendreports
-```
+## Running
+node crons\sendReports.js
+node crons\sendAlerts.js

@@ -1,11 +1,8 @@
-time_log_reporter/db.sqlite3
-time_log_reporter/reports/__pycache__/
-time_log_reporter/reports/management/__pycache__/
-time_log_reporter/reports/management/commands/__pycache__/
-time_log_reporter/reports/middleware/__pycache__/
-time_log_reporter/reports/migrations/__pycache__/
-time_log_reporter/reports/migrations/0001_initial.py
-time_log_reporter/reports/migrations/*_auto_*.py
-time_log_reporter/reports/templatetags/__pycache__/
-time_log_reporter/time_log_reporter/settings.py
-time_log_reporter/time_log_reporter/__pycache__/
+# environment variables dotfile
+.env
+
+# node_modules
+node_modules
+
+# other
+package-lock.json
